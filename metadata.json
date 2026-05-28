@@ -1,0 +1,6 @@
+{
+  "name": "AI Product Guide",
+  "description": "Интерактивный учебный гид-симулятор по созданию AI-продуктов с ИИ-ассистентом.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
