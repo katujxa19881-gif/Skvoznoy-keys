@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { COURSE_STEPS } from "./data";
 import { ChatMessage, CourseStep } from "./types";
+import { getLocalTheory } from "./theoryParser";
 
 function parseBold(text: string): string {
   if (!text) return "";
@@ -134,17 +135,22 @@ export default function App() {
             stepSubtitle: currentStep.subtitle
           })
         });
-        const data = await response.json();
         if (active) {
           if (response.ok) {
+            const data = await response.json();
             setTheoryData(data);
           } else {
-            setTheoryData(null);
+            // Fallback to local client-side parsing (helpful for static hosting/Netlify)
+            const localData = getLocalTheory(currentStep.stageNum, currentStep.title);
+            setTheoryData(localData);
           }
         }
       } catch (err) {
-        console.error("Failed to fetch theory:", err);
-        if (active) setTheoryData(null);
+        console.error("Failed to fetch theory from server, falling back to client-side parsing:", err);
+        if (active) {
+          const localData = getLocalTheory(currentStep.stageNum, currentStep.title);
+          setTheoryData(localData);
+        }
       } finally {
         if (active) setIsTheoryLoading(false);
       }

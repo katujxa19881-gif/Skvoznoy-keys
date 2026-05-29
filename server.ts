@@ -37,7 +37,7 @@ function getStageLines(lines: string[], stageNum: string): string[] {
   let startIndex = -1;
   let endIndex = -1;
 
-  const targetRegex = new RegExp("^Этап\\s+" + stageNum + "(\\b|\\s|-)", "i");
+  const targetRegex = new RegExp("^Этап\\s+" + stageNum + "\\s*-", "i");
 
   for (let i = 0; i < lines.length; i++) {
     if (targetRegex.test(lines[i])) {
@@ -68,7 +68,7 @@ function getStageLines(lines: string[], stageNum: string): string[] {
 
   if (startIndex !== -1) {
     const nextStageNum = (parseInt(stageNum, 10) + 1).toString();
-    const nextRegex = new RegExp("^Этап\\s+" + nextStageNum + "(\\b|\\s|-)", "i");
+    const nextRegex = new RegExp("^Этап\\s+" + nextStageNum + "\\s*-", "i");
     for (let i = startIndex + 1; i < lines.length; i++) {
       if (nextRegex.test(lines[i])) {
         endIndex = i;
@@ -127,36 +127,87 @@ app.post("/api/get-theory", (req, res) => {
     const targetStepNumber = matchNum ? parseInt(matchNum[1], 10) : null;
 
     let stepTheory = "";
-    if (targetStepNumber !== null && stepIndices.length > 0) {
-      let foundIndex = -1;
-      for (let idx = 0; idx < stepIndices.length; idx++) {
-        const lineStr = stageLines[stepIndices[idx]].trim();
-        const numMatch = lineStr.match(/^Шаг\s+(\d+)/i);
-        if (numMatch && parseInt(numMatch[1], 10) === targetStepNumber) {
-          foundIndex = idx;
-          break;
-        }
+    if (stageNum === "4") {
+      let scenariosIdx = -1;
+      let screensIdx = -1;
+      let modelIdx = -1;
+      let stackIdx = -1;
+      let securityIdx = -1;
+      let criteriaIdx = -1;
+      let saveIdx = -1;
+
+      for (let i = 0; i < stageLines.length; i++) {
+        const line = stageLines[i];
+        if (/Шаг 2 из 9/i.test(line)) scenariosIdx = i;
+        else if (/Шаг 4 из 9/i.test(line)) screensIdx = i;
+        else if (/Шаг 5 из 9/i.test(line)) modelIdx = i;
+        else if (/Шаг 5\s*[·\-\.]\s*часть\s*1/i.test(line)) stackIdx = i;
+        else if (/Шаг 7 из 9/i.test(line)) securityIdx = i;
+        else if (/Шаг 8 из 9/i.test(line)) criteriaIdx = i;
+        else if (/Шаг 9 из 9/i.test(line)) saveIdx = i;
       }
 
-      if (foundIndex === -1) {
-        const cleanTitle = stepTitle.replace(/^\d+\.\s*/, "").toLowerCase().slice(0, 10);
+      const stepNum = targetStepNumber;
+
+      if (stepNum === 1) {
+        const end = scenariosIdx !== -1 ? scenariosIdx : stageLines.length;
+        stepTheory = stageLines.slice(0, end).join("\n");
+      } else if (stepNum === 2) {
+        const start = scenariosIdx !== -1 ? scenariosIdx : 0;
+        const end = screensIdx !== -1 ? screensIdx : stageLines.length;
+        stepTheory = stageLines.slice(start, end).join("\n");
+      } else if (stepNum === 3) {
+        const start = screensIdx !== -1 ? screensIdx : 0;
+        const end = modelIdx !== -1 ? modelIdx : stageLines.length;
+        stepTheory = stageLines.slice(start, end).join("\n");
+      } else if (stepNum === 4) {
+        const start = modelIdx !== -1 ? modelIdx : 0;
+        const end = stackIdx !== -1 ? stackIdx : stageLines.length;
+        stepTheory = stageLines.slice(start, end).join("\n");
+      } else if (stepNum === 5) {
+        const start = stackIdx !== -1 ? stackIdx : 0;
+        const end = securityIdx !== -1 ? securityIdx : stageLines.length;
+        stepTheory = stageLines.slice(start, end).join("\n");
+      } else if (stepNum === 6) {
+        const start = securityIdx !== -1 ? securityIdx : 0;
+        const end = saveIdx !== -1 ? saveIdx : stageLines.length;
+        stepTheory = stageLines.slice(start, end).join("\n");
+      } else if (stepNum === 7) {
+        const start = saveIdx !== -1 ? saveIdx : 0;
+        stepTheory = stageLines.slice(start).join("\n");
+      }
+    } else {
+      if (targetStepNumber !== null && stepIndices.length > 0) {
+        let foundIndex = -1;
         for (let idx = 0; idx < stepIndices.length; idx++) {
-          const lineStr = stageLines[stepIndices[idx]].toLowerCase();
-          if (lineStr.includes(cleanTitle)) {
+          const lineStr = stageLines[stepIndices[idx]].trim();
+          const numMatch = lineStr.match(/^Шаг\s+(\d+)/i);
+          if (numMatch && parseInt(numMatch[1], 10) === targetStepNumber) {
             foundIndex = idx;
             break;
           }
         }
-      }
 
-      if (foundIndex === -1 && targetStepNumber - 1 < stepIndices.length) {
-        foundIndex = targetStepNumber - 1;
-      }
+        if (foundIndex === -1) {
+          const cleanTitle = stepTitle.replace(/^\d+\.\s*/, "").toLowerCase().slice(0, 10);
+          for (let idx = 0; idx < stepIndices.length; idx++) {
+            const lineStr = stageLines[stepIndices[idx]].toLowerCase();
+            if (lineStr.includes(cleanTitle)) {
+              foundIndex = idx;
+              break;
+            }
+          }
+        }
 
-      if (foundIndex !== -1) {
-        const startIdx = stepIndices[foundIndex];
-        const endIdx = foundIndex < stepIndices.length - 1 ? stepIndices[foundIndex + 1] : stageLines.length;
-        stepTheory = stageLines.slice(startIdx, endIdx).join("\n");
+        if (foundIndex === -1 && targetStepNumber - 1 < stepIndices.length) {
+          foundIndex = targetStepNumber - 1;
+        }
+
+        if (foundIndex !== -1) {
+          const startIdx = stepIndices[foundIndex];
+          const endIdx = foundIndex < stepIndices.length - 1 ? stepIndices[foundIndex + 1] : stageLines.length;
+          stepTheory = stageLines.slice(startIdx, endIdx).join("\n");
+        }
       }
     }
 
