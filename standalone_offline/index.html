@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Product Guide — Автономная Версия</title>
+  
+  <!-- Загрузка скриптов: если они лежат в одной папке локально (как у студента), то они подгрузятся. 
+       В качестве резервной копии подключаем CDN, чтобы программа открывалась с диска даже без предзагруженных скриптов. -->
+  <script src="vue.global.js" onerror="this.onerror=null; this.src='https://unpkg.com/vue@3/dist/vue.global.js'"></script>
+  <script src="tailwindcss.js" onerror="this.onerror=null; this.src='https://cdn.tailwindcss.com'"></script>
+  
+  <style>
+    /* Кастомная прокрутка для стиля терминала */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 255, 133, 0.15);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 255, 133, 0.4);
+    }
+    
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+  </style>
+</head>
+<body class="bg-[#030914] text-gray-100 min-h-screen">
+
+  <div id="app"></div>
+
+  <!-- Подключение основного скрипта компонента учебника -->
+  <script src="component.js"></script>
+</body>
+</html>

@@ -6,9 +6,14 @@ export interface CourseStep {
   title: string;
   subtitle: string;
   badgeText: string;
-  badgeType: "action" | "must" | "active" | "neutral";
+  badgeType: "action" | "must" | "active" | "neutral" | "theme";
   promptTitle?: string;
   promptContent?: string;
+  promptsByTrack?: {
+    external: string;
+    internal: string;
+    personal: string;
+  };
   stepIdx: number;
 }
 
